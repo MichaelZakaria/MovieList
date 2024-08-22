@@ -1,24 +1,30 @@
 //
-//  ViewController.swift
+//  HomeViewController.swift
 //  MovieList
 //
-//  Created by Marco on 2024-07-24.
+//  Created by Marco on 2024-08-04.
 //
 
 import UIKit
 
-class ViewController: UITableViewController, AddMovieProtocol {
+class HomeViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, AddMovieProtocol {
+    
     var movies: [Movie] = []
     var databaseManager: DataBaseManager?
     
+    @IBOutlet weak var myTable: UITableView!
+    
     func addNewMovie(movie: Movie) {
         movies.append(movie)
-        self.tableView.reloadData()
+        myTable.reloadData()
     }
-    
+
     override func viewDidLoad() {
+        myTable.delegate = self
+        myTable.dataSource = self
+        
         let cellNib = UINib(nibName: "MovieTableViewCell", bundle: nil)
-        tableView.register(cellNib, forCellReuseIdentifier: "myCell")
+        myTable.register(cellNib, forCellReuseIdentifier: "myCell")
         
         databaseManager = DataBaseManager.instance
         
@@ -27,7 +33,7 @@ class ViewController: UITableViewController, AddMovieProtocol {
 //        let movie3 = Movie(title: "Bee", image: UIImage(named: "Bee")!, rating: 8, releaseYear: 2007, genre: ["Comedy", "Animation", "Family"])
 //        let movie4 = Movie(title: "Fall", image: UIImage(named: "Fall")!, rating: 9.8, releaseYear: 2022, genre: ["Thriller"])
 //        let movie5 = Movie(title: "Her", image: UIImage(named: "Her")!, rating: 7.5, releaseYear: 2013, genre: ["SCI-Fi","Drama"])
-//        
+//
 //        databaseManager?.insert(movie: movie1)
 //        databaseManager?.insert(movie: movie2)
 //        databaseManager?.insert(movie: movie3)
@@ -39,23 +45,23 @@ class ViewController: UITableViewController, AddMovieProtocol {
         // Do any additional setup after loading the view.
     }
     
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 180
-    }
-    
-    override func numberOfSections(in tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return movies.count
     }
     
-    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return "Movies"
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 180
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "myCell", for: indexPath) as! MovieTableViewCell
         
         cell.movieName.text = movies[indexPath.row].title
@@ -65,7 +71,7 @@ class ViewController: UITableViewController, AddMovieProtocol {
         return cell
     }
     
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         let movieDescription: MyTableViewController = self.storyboard?.instantiateViewController(withIdentifier: "StaticTableView") as! MyTableViewController
         
@@ -74,8 +80,8 @@ class ViewController: UITableViewController, AddMovieProtocol {
         self.navigationController?.pushViewController(movieDescription, animated: true)
     }
     
-    override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let action = UIContextualAction(style: .destructive, title: "Delete") {_,_,_ in 
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let action = UIContextualAction(style: .destructive, title: "Delete") {_,_,_ in
             self.databaseManager?.delete(movie: self.movies[indexPath.row])
             self.movies = self.databaseManager?.query() ?? []
             tableView.reloadData()
@@ -85,7 +91,7 @@ class ViewController: UITableViewController, AddMovieProtocol {
         
         return swipeCongiguration
     }
-
+    
     @IBAction func addNewMovie(_ sender: Any) {
         let addNewMovieView = self.storyboard?.instantiateViewController(withIdentifier: "addMovie") as! AddMovieViewController
         
@@ -94,5 +100,15 @@ class ViewController: UITableViewController, AddMovieProtocol {
         self.navigationController?.pushViewController(addNewMovieView, animated: true)
     }
     
-}
 
+    /*
+    // MARK: - Navigation
+
+    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Get the new view controller using segue.destination.
+        // Pass the selected object to the new view controller.
+    }
+    */
+
+}
